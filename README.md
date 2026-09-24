@@ -1528,7 +1528,7 @@ Credentials, private configuration, generated data, Kafka checkpoints, and envir
 # Author
 
 **Moamen Samir**
-**Khaled Waleed**
+, **Khaled Waleed**
 
 Aspiring Data Engineer focused on:
 
