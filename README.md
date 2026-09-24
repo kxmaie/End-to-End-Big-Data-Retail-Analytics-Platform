@@ -1528,6 +1528,7 @@ Credentials, private configuration, generated data, Kafka checkpoints, and envir
 # Author
 
 **Moamen Samir**
+**Khaled Waleed**
 
 Aspiring Data Engineer focused on:
 
@@ -1542,3 +1543,4 @@ Aspiring Data Engineer focused on:
 GitHub:
 
 `https://github.com/kxmaie`
+`https://github.com/Khaled-3`
