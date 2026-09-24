@@ -1,0 +1,451 @@
+RetailPulse Capstone – Retail Analytics
+CORE COMMANDS USED
+============================================================
+
+This file contains the main project/workflow commands only.
+Troubleshooting, failed commands, error-fixing commands, diagnostic-only
+commands, service-restart commands, and temporary problem-solving commands
+are intentionally excluded.
+
+Project flow:
+RDS PostgreSQL → Sqoop → HDFS/Hive Bronze
+Streaming JSON → Flume → Kafka → Spark → Hive Silver/Gold
+Hive Gold → Presto → Metabase
+
+============================================================
+1. PROJECT / ENVIRONMENT
+============================================================
+
+mkdir -p ~/Capstone_RetailPulse
+
+cd ~/Docker-BigData-Tools
+
+docker compose ps
+
+docker compose config --services
+
+sqoop version
+
+
+============================================================
+2. SOURCE DATABASE – POSTGRESQL / RDS
+============================================================
+
+Source database:
+Host: nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com
+Port: 5432
+Database: NTI
+Schema: capstone_retail
+User: postgres
+
+Main Sqoop connection:
+
+sqoop list-tables \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --schema capstone_retail
+
+
+============================================================
+3. SQOOP – POSTGRESQL → HDFS BRONZE
+============================================================
+
+HDFS Bronze root:
+
+/data/retailpulse/bronze/postgres
+
+
+3.1 STORES
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table stores \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/stores \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --num-mappers 1
+
+
+3.2 CUSTOMERS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table customers \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/customers \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --num-mappers 2
+
+
+3.3 PRODUCTS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table products \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/products \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --num-mappers 2
+
+
+3.4 ORDERS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table orders \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/orders \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --split-by order_id \
+  --num-mappers 4
+
+
+3.5 ORDER_ITEMS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table order_items \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/order_items \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --split-by order_item_id \
+  --num-mappers 4
+
+
+3.6 PAYMENTS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table payments \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/payments \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --split-by payment_id \
+  --num-mappers 4
+
+
+3.7 FULFILLMENT_EVENTS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table fulfillment_events \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/fulfillment_events \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --split-by fulfillment_event_id \
+  --num-mappers 4
+
+
+3.8 INVENTORY_SNAPSHOTS
+
+sqoop import \
+  --connect "jdbc:postgresql://nti-labs.cih6ce2ewr0r.us-east-1.rds.amazonaws.com:5432/NTI?sslmode=verify-full&sslrootcert=/certs/global-bundle.pem" \
+  --username postgres \
+  --password '12345678' \
+  --table inventory_snapshots \
+  --schema capstone_retail \
+  --target-dir /data/retailpulse/bronze/postgres/inventory_snapshots \
+  --as-textfile \
+  --fields-terminated-by ',' \
+  --split-by inventory_snapshot_id \
+  --num-mappers 4
+
+
+============================================================
+4. HDFS – BRONZE DATA
+============================================================
+
+Create Bronze root:
+
+hdfs dfs -mkdir -p /data/retailpulse/bronze/postgres
+
+List Bronze tables:
+
+hdfs dfs -ls /data/retailpulse/bronze/postgres
+
+List a specific imported table:
+
+hdfs dfs -ls /data/retailpulse/bronze/postgres/<TABLE_NAME>
+
+Read imported files:
+
+hdfs dfs -cat /data/retailpulse/bronze/postgres/<TABLE_NAME>/part-*
+
+
+============================================================
+5. HIVE – BRONZE DATABASE
+============================================================
+
+CREATE DATABASE IF NOT EXISTS retailpulse_bronze;
+
+USE retailpulse_bronze;
+
+
+============================================================
+6. HIVE – BRONZE EXTERNAL TABLES
+============================================================
+
+The Bronze Hive tables point to the Sqoop HDFS directories.
+
+General structure:
+
+CREATE EXTERNAL TABLE <table_name> (
+    ...
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/data/retailpulse/bronze/postgres/<table_name>';
+
+
+Tables created for the source data:
+
+stores
+customers
+products
+orders
+order_items
+payments
+fulfillment_events
+inventory_snapshots
+
+
+============================================================
+7. FLUME – STREAMING INPUT
+============================================================
+
+Streaming source:
+
+base/flume/lab_data/retailpulse/
+
+Generated event files follow the pattern:
+
+retailpulse_events_<timestamp>_<batch>.json
+
+
+Flume configuration file:
+
+base/flume/flume.conf
+
+
+Flume configuration repository copy:
+
+configs/flume.conf
+
+
+Flume reads the newline-delimited JSON event files and sends them
+to the Kafka topic used by the RetailPulse streaming pipeline.
+
+
+============================================================
+8. KAFKA – RETAILPULSE EVENTS
+============================================================
+
+Kafka topic:
+
+retailpulse-events
+
+
+Start a console consumer from the beginning of the topic:
+
+kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 \
+  --topic retailpulse-events \
+  --from-beginning
+
+
+Streaming flow:
+
+Flume → retailpulse-events → Spark
+
+
+============================================================
+9. SPARK – STREAMING / ETL
+============================================================
+
+Spark consumes the RetailPulse Kafka events and performs the
+streaming transformation required before the Silver/Gold Hive layer.
+
+Logical pipeline:
+
+Kafka
+  ↓
+Spark
+  ↓
+Silver
+  ↓
+Gold
+
+
+The Spark processing is represented by:
+
+notebooks/retailpulse_pipeline.ipynb
+
+
+============================================================
+10. HIVE – SILVER / GOLD
+============================================================
+
+Analytical layers:
+
+Bronze
+Silver
+Gold
+
+
+The Gold layer contains the governed analytical marts used by Presto.
+
+Main Gold schema:
+
+retailpulse_gold
+
+
+One of the Gold analytical entities:
+
+Dim Date
+
+
+============================================================
+11. PRESTO – QUERY / SERVING LAYER
+============================================================
+
+Presto catalog:
+
+presto
+
+Gold schema:
+
+retailpulse_gold
+
+
+Query flow:
+
+Presto
+  ↓
+retailpulse_gold
+  ↓
+Hive Gold tables
+
+
+============================================================
+12. METABASE – BI / DATA VERIFICATION
+============================================================
+
+Metabase connects to:
+
+Presto → retailpulse_gold
+
+The Gold schema was inspected through the Metabase Presto catalog.
+
+Metabase path used:
+
+presto
+  → retailpulse_gold
+
+
+============================================================
+13. GIT / GITHUB
+============================================================
+
+cd ~/Capstone_RetailPulse
+
+git init
+
+git add .
+
+git commit -m "Initial RetailPulse capstone project"
+
+git remote add origin https://github.com/kxmaie/End-to-End-Big-Data-Retail-Analytics-Platform.git
+
+git branch -M main
+
+git push -u origin main
+
+
+Repository:
+
+https://github.com/kxmaie/End-to-End-Big-Data-Retail-Analytics-Platform.git
+
+
+============================================================
+14. PROJECT FILES / ARTIFACTS
+============================================================
+
+README.md
+
+.gitignore
+
+configs/flume.conf
+
+notebooks/retailpulse_pipeline.ipynb
+
+streaming/generate_retailpulse_events.py
+
+
+============================================================
+15. FINAL END-TO-END FLOW
+============================================================
+
+BATCH:
+
+PostgreSQL RDS
+      ↓
+    Sqoop
+      ↓
+HDFS Bronze
+      ↓
+Hive Bronze
+      ↓
+Silver transformations
+      ↓
+Hive Gold
+      ↓
+Presto
+      ↓
+Metabase
+
+
+STREAMING:
+
+JSON Events
+      ↓
+    Flume
+      ↓
+    Kafka
+      ↓
+    Spark
+      ↓
+Hive Silver
+      ↓
+Hive Gold
+      ↓
+Presto
+      ↓
+Metabase
+
+
+============================================================
+END
+============================================================
