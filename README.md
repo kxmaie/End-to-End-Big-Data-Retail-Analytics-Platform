@@ -1528,7 +1528,7 @@ Credentials, private configuration, generated data, Kafka checkpoints, and envir
 # Author
 
 **Moamen Samir**
-, **Khaled Waleed**
+, **Khaled Waleed** , **Ezz Eldin Elsharkawy**
 
 Aspiring Data Engineer focused on:
 
@@ -1544,3 +1544,4 @@ GitHub:
 
 `https://github.com/kxmaie`
 `https://github.com/Khaled-3`
+`https://github.com/EzzEldinElsharkawy`
