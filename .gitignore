@@ -1,0 +1,80 @@
+# =========================
+# Credentials / Secrets
+# =========================
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+config/secrets/
+**/*password*
+**/*passwd*
+**/*secret*
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Logs
+# =========================
+*.log
+log/
+logs/
+
+# =========================
+# Data
+# =========================
+data/
+raw/
+processed/
+output/
+
+# =========================
+# HDFS / Spark
+# =========================
+checkpoints/
+checkpoint/
+spark-warehouse/
+
+# =========================
+# Generated files
+# =========================
+*.csv
+*.parquet
+*.json
+*.orc
+*.avro
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
+*.swp
+*.swo
+# =========================
+# Project generated exports
+# =========================
+csv_export/
+data_export/
+spark-warehouse/
