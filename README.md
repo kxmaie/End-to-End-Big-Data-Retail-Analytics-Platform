@@ -667,7 +667,7 @@ The **Retail Pulse — Sales Overview** dashboard is organized into four tabs:
 
 ## 1. Overview
 
-![Overview](docs/dashboard/01_overview.jpeg)
+![Overview](docs/Dashboard/01_overview.jpeg)
 
 **KPIs:** Total Units Sold (896,413), Total Sales (391.9M), Total Orders (100,000), Average Order Value (3,919.18).
 
@@ -679,7 +679,7 @@ The **Retail Pulse — Sales Overview** dashboard is organized into four tabs:
 
 ## 2. Product Performance
 
-![Product Performance](docs/dashboard/02_product_performance.jpeg)
+![Product Performance](docs/Dashboard/02_product_performance.jpeg)
 
 **KPIs:** Average Margin % (26.26), Total Products Sold (10,000), Total Units Sold (896,413), Top Category by Revenue (Home).
 
@@ -691,7 +691,7 @@ The **Retail Pulse — Sales Overview** dashboard is organized into four tabs:
 
 ## 3. Customer Insights
 
-![Customer Insights](docs/dashboard/03_customer_insights.jpeg)
+![Customer Insights](docs/Dashboard/03_customer_insights.jpeg)
 
 **KPIs:** Total Active Customers (29,961), Average Revenue per Customer (13,080.94), Repeat Purchase Rate (59.19), Total Sales (391.9M).
 
@@ -702,7 +702,7 @@ The **Retail Pulse — Sales Overview** dashboard is organized into four tabs:
 
 ## 4. Operations
 
-![Operations](docs/dashboard/04_operations.jpeg)
+![Operations](docs/Dashboard/04_operations.jpeg)
 
 **KPIs:** Total Warehouses in Operation (5), Average Order Value (3,919.18), Total Sales (391.9M), Total Orders (100,000).
 
